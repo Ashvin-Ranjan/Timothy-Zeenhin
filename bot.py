@@ -2,6 +2,7 @@ import discord
 import discordhelp
 import json
 import emoji
+import msgpack
 
 learnnew = True
 
@@ -15,8 +16,11 @@ for i in range(len(ratio)):
 
 dictionary = {}
 
-with open('dictionary.json') as f:
-    dictionary = json.load(f)
+# Read msgpack file
+with open("dictionary.msgpack", "rb") as f:
+	byte_data = f.read()
+
+dictionary = msgpack.unpackb(byte_data)
 
 client = discord.Client()
 
@@ -37,7 +41,7 @@ async def on_message(message):
 	if len(serveremotes) != message.guild.emojis:
 		for i in message.guild.emojis:
 			if not i.animated:
-				serveremotes.append("<:" + str(i.name) + ":" + str(i.id) + ">")
+				serveremotes.append('<:%s:%s>' % (i.name, i.id))
 
 	print(message.content)
 	if message.author == client.user:
@@ -56,8 +60,10 @@ async def on_message(message):
 			except:
 				dictionary[i] = replacements[len(dictionary.keys())]
 				processed = processed.replace(i, dictionary[i])
-				with open('dictionary.json', 'w+') as f:
-					json.dump(dictionary, f)
+				# Write msgpack file
+				with open("dictionary.msgpack", "wb") as f:
+					packed = msgpack.packb(dictionary)
+					f.write(packed)
 
 		end = ""
 		for char in processed:
@@ -84,4 +90,4 @@ async def on_message(message):
 
 
 
-client.run("")
+client.run("Nzg2MjY5NTYxOTU1NTQ5Mjc0.X9D8lw.4Qa-vulXVuhOUE4Xor38Ru0PLbQ")
