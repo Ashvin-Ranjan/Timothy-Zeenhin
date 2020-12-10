@@ -34,6 +34,8 @@ with open("dictionary.msgpack", "rb") as f:
 
 dictionary = msgpack.unpackb(byte_data)
 
+dictionary_inv = {v: k for k, v in dictionary.items()}
+
 print(message_timer)
 
 
@@ -62,9 +64,37 @@ async def on_message(message):
 		except:
 			ignore.append(message.channel)
 
-	if message.author == client.user or message.author.bot or message.channel in ignore or str(message.author) == "MysticalApple#0085":
+	
+
+
+	if message.author == client.user or message.author.bot or message.channel in ignore:
 		return
 
+	if "timothy" in message.content:
+		m = brain.createMessage()
+		p = m
+		for i in serveremotes:
+			p = p.replace(i, dictionary[i])
+
+		e = ""
+		for char in p:
+			if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases ):
+				e += char
+		prob = random.random()
+		if len(e) < 3 and len(set(e)) == len(e) and not "\n" in m:
+			for em in e:
+				try:
+					await message.add_reaction(dictionary_inv[em])
+				except:
+					await message.add_reaction(em)
+		else:
+			while e[0] == "n":
+				e = e[1:]
+
+			try:
+				await message.add_reaction(dictionary_inv[e[0]])
+			except:
+				await message.add_reaction(e[0])
 
 	message_timer -= 1
 	print(message_timer)
@@ -78,17 +108,16 @@ async def on_message(message):
 
 		e = ""
 		for char in p:
-			if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases):
+			if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases ):
 				e += char
 		prob = random.random()
 		if len(e) < 3 and len(set(e)) == len(e) and prob < .75 and not "\n" in e:
-			dictionary_inv = {v: k for k, v in dictionary.items()}
 			for em in e:
 				try:
 					await message.add_reaction(dictionary_inv[em])
 				except:
 					try:	
-						await message.add_reaction(dictionary_inv[e])
+						await message.add_reaction(em)
 					except:
 						ignore.append(message.channel)
 						message_timer = 1
@@ -124,7 +153,7 @@ async def on_message(message):
 				end += char
 
 		end = end.replace("\n", "n")
-		if end.replace('n', "") != "":
+		if end.replace('n', "") != "" and str(message.author) != "MysticalApple#0085":
 			end = ":" + end + ","
 			with open('messages.txt', 'a') as f:
 				f.write(end + "\n")
