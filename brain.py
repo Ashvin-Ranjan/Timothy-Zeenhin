@@ -34,6 +34,12 @@ def createMessage():
 	with open("messages.txt", "r", encoding="utf-8") as f:
 		messages = f.readlines()
 
+	messages = list(set(messages))
+
+	with open("messages.txt", "w", encoding="utf-8") as f:
+		for line in messages:
+			f.write(line)
+
 	clean = []
 	for i in messages:
 		if i != "":
@@ -81,5 +87,3 @@ def decode(s):
 				out += char
 
 	return out
-
-print(createMessage())
