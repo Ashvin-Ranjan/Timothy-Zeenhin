@@ -102,10 +102,10 @@ async def on_message(message):
 
 
 	prob = random.random()
-	print(round(prob * 100)/100.0)
+	print(round(prob * 1000)/1000.0)
 	
 	#send message or reaction
-	if (message.channel.id == 711793617529995297 and prob < .25) or prob < 0.01:
+	if (message.channel.id == 711793617529995297 and prob < .25) or prob <= 0.01:
 		m = brain.createMessage()
 		p = m
 		for i in serveremotes:
@@ -124,7 +124,7 @@ async def on_message(message):
 					try:	
 						await message.add_reaction(em)
 					except:
-						ignore.append(message.channel)		
+						pass
 		else:
 			try:	
 				await message.channel.send(m)

@@ -11,20 +11,32 @@ dictionary = msgpack.unpackb(byte_data)
 
 dictionary_inv = {v: k for k, v in dictionary.items()}
 
+context = 3
 
 def generateChainDict(l):
 	out = {}
 	for message in l:
 		for i,char in enumerate(message):
-			if not char in out:
-				out[char] = {}
-			if char == ",":
-				pass
+			if i < context:
+				if not message[0:i + 1] in out:
+					out[message[0:i + 1]] = {}
+				if char == ",":
+					pass
+				else:
+					try:
+						out[message[0:i + 1]][message[i+1]] += 1
+					except:
+						out[message[0:i + 1]][message[i+1]] = 1
 			else:
-				try:
-					out[char][message[i+1]] += 1
-				except:
-					out[char][message[i+1]] = 1
+				if not message[i-(context - 1):i + 1] in out:
+					out[message[i-(context - 1):i + 1]] = {}
+				if char == ",":
+					pass
+				else:
+					try:
+						out[message[i-(context - 1):i + 1]][message[i+1]] += 1
+					except:
+						out[message[i-(context - 1):i + 1]][message[i+1]] = 1
 
 
 	return out
@@ -54,19 +66,34 @@ def createMessage():
 	out = ":"
 
 	while cont:
-		s = 0
-		for i in message_data[out[len(out) -1]].keys():
-			s += message_data[out[len(out) -1]][i]
+		if len(out) < context:
+			s = 0
+			for i in message_data[out[0:len(out)]].keys():
+				s += message_data[out[0:len(out)]][i]
 
-		rand = random.randint(0, s)
+			rand = random.randint(0, s)
 
-		for i in message_data[out[len(out) -1]].keys():
-			rand -= message_data[out[len(out) -1]][i]
-			if rand <= 0:
-				out += i
-				if i == ",":
-					cont = False
-				break
+			for i in message_data[out[0:len(out)]].keys():
+				rand -= message_data[out[0:len(out)]][i]
+				if rand <= 0:
+					out += i
+					if i == ",":
+						cont = False
+					break
+		else:
+			s = 0
+			for i in message_data[out[len(out)-context:len(out)]].keys():
+				s += message_data[out[len(out)-context:len(out)]][i]
+
+			rand = random.randint(0, s)
+
+			for i in message_data[out[len(out)-context:len(out)]].keys():
+				rand -= message_data[out[len(out)-context:len(out)]][i]
+				if rand <= 0:
+					out += i
+					if i == ",":
+						cont = False
+					break
 
 
 
