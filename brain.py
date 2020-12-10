@@ -2,15 +2,6 @@ import msgpack
 import random
 
 dictionary = {}
-ratio = []
-
-
-
-with open("ratio.txt", "r") as f:
-	ratio = f.readlines()
-
-for i in range(len(ratio)):
-	ratio[i] = int(ratio[i])
 
 # Read msgpack file
 with open("dictionary.msgpack", "rb") as f:

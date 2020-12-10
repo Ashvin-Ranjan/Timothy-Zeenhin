@@ -7,22 +7,14 @@ import brain
 import random
 
 
+ignore = []
 
 learnnew = True
 
 specialcases = ["🦭", "🫁"]
 
-ratio = []
-
 def generateInterval():
-	out = 1
-	prob = ratio[0]/(ratio[0] + ratio[1])
-	cont = True
-	while cont:
-		cont = not (random.random() < prob)
-		out += 2
-
-	return out
+	return random.randint(70, 100)
 
 client = discord.Client()
 
@@ -31,13 +23,6 @@ replacements = ['{', '|', '}', '~', '␡', '\x80', '\x81', '\x82', '\x83', '\x84
 registered = False
 
 serveremotes = []
-
-
-with open("ratio.txt", "r") as f:
-	ratio = f.readlines()
-
-for i in range(len(ratio)):
-	ratio[i] = int(ratio[i])
 
 message_timer = generateInterval()
 
@@ -70,18 +55,51 @@ async def on_message(message):
 			if not i.animated:
 				serveremotes.append('<:%s:%s>' % (i.name, i.id))
 
-	if message.author == client.user:
-		return
 
 	if f'<@!{client.user.id}>' in message.content:
-		await message.channel.send(brain.createMessage())
+		try:
+			await message.channel.send(brain.createMessage())
+		except:
+			ignore.append(message.channel)
+
+	if message.author == client.user or message.author.bot or message.channel in ignore or str(message.author) == "MysticalApple#0085":
+		return
+
 
 	message_timer -= 1
+	print(message_timer)
 
 	if message_timer <= 0:
 		message_timer = generateInterval()
-		print(message_timer)
-		await message.channel.send(brain.createMessage())
+		m = brain.createMessage()
+		p = m
+		for i in serveremotes:
+			p = p.replace(i, dictionary[i])
+
+		e = ""
+		for char in p:
+			if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases):
+				e += char
+		prob = random.random()
+		if len(e) < 3 and len(set(e)) == len(e) and prob < .75 and not "\n" in e:
+			dictionary_inv = {v: k for k, v in dictionary.items()}
+			for em in e:
+				try:
+					await message.add_reaction(dictionary_inv[em])
+				except:
+					try:	
+						await message.add_reaction(dictionary_inv[e])
+					except:
+						ignore.append(message.channel)
+						message_timer = 1
+						print(message_timer)			
+		else:
+			try:	
+				await message.channel.send(m)
+			except:
+				ignore.append(message.channel)
+				message_timer = 1
+				print(message_timer)
 
 	if learnnew:
 		processed = message.content
@@ -107,17 +125,11 @@ async def on_message(message):
 
 		end = end.replace("\n", "n")
 		if end.replace('n', "") != "":
-			ratio[0] += 1
 			end = ":" + end + ","
 			with open('messages.txt', 'a') as f:
 				f.write(end + "\n")
 			print(message.content)
 			print(end)
-		else:
-			ratio[1] += 1
-
-		with open("ratio.txt", "w") as f:
-			f.write(str(ratio[0]) + "\n" + str(ratio[1]))
 
 
 
@@ -126,4 +138,4 @@ async def on_message(message):
 
 
 
-client.run("")
+client.run("Nzg2MjY5NTYxOTU1NTQ5Mjc0.X9D8lw.MRleZgoWMNDJgINZyKJmvGcYBFg")
