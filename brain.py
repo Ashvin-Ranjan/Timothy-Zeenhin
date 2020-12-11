@@ -3,7 +3,6 @@ import random
 
 dictionary = {}
 
-# Read msgpack file
 with open("dictionary.msgpack", "rb") as f:
 	byte_data = f.read()
 

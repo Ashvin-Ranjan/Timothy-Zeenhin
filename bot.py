@@ -15,9 +15,7 @@ specialcases = ["🦭", "🫁"]
 
 client = discord.Client()
 
-replacements = ['{', '|', '}', '~', '␡', '\x80', '\x81', '\x82', '\x83', '\x84', '\x85', '\x86', '\x87', '\x88', '\x89', '\x8a', '\x8b', '\x8c', '\x8d', '\x8e', '\x8f', '\x90', '\x91', '\x92', '\x93', '\x94', '\x95', '\x96', '\x97', '\x98', '\x99', '\x9a', '\x9b', '\x9c', '\x9d', '\x9e', '\x9f', 'ａ', 'ｂ', '¡', '¢', '£', '¤', '¥', '¦', '§', '¨', '©', 'ª', '«', '¬', '\xad', '®', '¯', '°', '±', '²', '³', '´', 'µ', '¶', '·', '¸', '¹', 'º', '»', '¼', '½', '¾', '¿', 'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', '×', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'Þ', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', '÷', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'þ', 'ÿ', 'Ā']
-
-registered = False
+registered = []
 
 serveremotes = []
 
@@ -32,7 +30,7 @@ def sendReaction(message, l):
 
 	e = ""
 	for char in p:
-		if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases ):
+		if(char in emoji.UNICODE_EMOJI or char in dictionary.keys() or char == "\n" or char in specialcases ):
 			e += char
 
 	e.replace("\n", "n")
@@ -56,6 +54,7 @@ dictionary = msgpack.unpackb(byte_data)
 
 dictionary_inv = {v: k for k, v in dictionary.items()}
 
+print(dictionary)
 
 @client.event
 async def on_ready():
@@ -70,11 +69,12 @@ async def on_ready():
 async def on_message(message):
 	global registered
 	#register all server emotes
-	if not registered:
-		registered = True
+	if not message.guild.id in registered:
+		registered.append(message.guild.id)
 		for i in message.guild.emojis:
 			if not i.animated:
 				serveremotes.append('<:%s:%s>' % (i.name, i.id))
+		registered.append(message.guild.id)
 
 
 	#send reaction if timothy is in name
@@ -88,6 +88,13 @@ async def on_message(message):
 					await message.add_reaction(em)
 				except:
 					pass
+
+	#send reaction if timothy is in name
+	if "flushedtaco" in message.content.lower().replace(" ", ""):
+		try:
+			await message.add_reaction("<:flushedtaco:786270715187167242>")
+		except:
+			pass
 
 	#send message if @ ed
 	if f'<@!{client.user.id}>' in message.content or f'<@{client.user.id}>' in message.content:
@@ -113,7 +120,7 @@ async def on_message(message):
 
 		e = ""
 		for char in p:
-			if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases ):
+			if(char in emoji.UNICODE_EMOJI or char in dictionary.keys() or char == "\n" or char in specialcases ):
 				e += char
 		prob = random.random()
 		if len(e) <= 1 and len(set(e)) == len(e) and prob < .25 and not "\n" in e:
@@ -135,24 +142,24 @@ async def on_message(message):
 	if learnnew and not message.author.bot:
 		processed = message.content
 
-		for i in replacements:
+		for i in dictionary_inv.keys():
 			processed = processed.replace(i, "")
 
 		for i in serveremotes:
 			try:
 				processed = processed.replace(i, dictionary[i])
 			except:
+				print("adding " + i)
 				#if something is not in the dictionary add it
-				dictionary[i] = replacements[len(dictionary.keys())]
+				dictionary[i] = chr(len(dictionary.keys()) + 200)
 				processed = processed.replace(i, dictionary[i])
 				# Write msgpack file
 				with open("dictionary.msgpack", "wb") as f:
 					packed = msgpack.packb(dictionary)
 					f.write(packed)
-
 		end = ""
 		for char in processed:
-			if(char in emoji.UNICODE_EMOJI or char in replacements or char == "\n" or char in specialcases):
+			if(char in emoji.UNICODE_EMOJI or char in dictionary_inv.keys() or char == "\n" or char in specialcases):
 				end += char
 
 		#learning and writing, and maybe reacting
@@ -182,4 +189,4 @@ async def on_message(message):
 
 
 
-client.run("")
+client.run("Nzg2MjY5NTYxOTU1NTQ5Mjc0.X9D8lw.njwyge16RYx2xdP7MXnwUh9erm4")
