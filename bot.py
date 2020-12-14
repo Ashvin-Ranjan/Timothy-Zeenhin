@@ -5,6 +5,7 @@ import emoji
 import msgpack
 import brain
 import random
+import asyncio
 
 
 ignore = []
@@ -64,7 +65,6 @@ async def on_ready():
 	print("The bot is ready")
 	
 
-
 @client.event
 async def on_message(message):
 	global registered
@@ -76,30 +76,12 @@ async def on_message(message):
 				serveremotes.append('<:%s:%s>' % (i.name, i.id))
 		registered.append(message.guild.id)
 
-
-	#send reaction if timothy is in name
-	if "timothy" in message.content.lower():
-		e = sendReaction(message, 1)
-		for em in e:
-			try:
-				await message.add_reaction(dictionary_inv[em])
-			except:
-				try:
-					await message.add_reaction(em)
-				except:
-					pass
-
-	#send reaction if timothy is in name
-	if "flushedtaco" in message.content.lower().replace(" ", ""):
-		try:
-			await message.add_reaction("<:flushedtaco:786270715187167242>")
-		except:
-			pass
-
 	#send message if @ ed
 	if f'<@!{client.user.id}>' in message.content or f'<@{client.user.id}>' in message.content:
 		try:
-			await message.channel.send(brain.createMessage())
+			async with message.channel.typing():
+				await asyncio.sleep(random.random()/4)
+				await message.channel.send(brain.createMessage())
 		except:
 			ignore.append(message.channel)
 		return
@@ -109,10 +91,9 @@ async def on_message(message):
 
 
 	prob = random.random()
-	print(round(prob * 1000)/1000.0)
 	
 	#send message or reaction
-	if (message.channel.id == 711793617529995297 and prob < .25) or prob <= 0.01:
+	if (message.channel.id == 711793617529995297 and prob < .125) or prob <= 0.0035 or message.author.id == 723063395280224257:
 		m = brain.createMessage()
 		p = m
 		for i in serveremotes:
@@ -123,20 +104,14 @@ async def on_message(message):
 			if(char in emoji.UNICODE_EMOJI or char in dictionary.keys() or char == "\n" or char in specialcases ):
 				e += char
 		prob = random.random()
-		if len(e) <= 1 and len(set(e)) == len(e) and prob < .25 and not "\n" in e:
-			for em in e:
-				try:
-					await message.add_reaction(dictionary_inv[em])
-				except:
-					try:	
-						await message.add_reaction(em)
-					except:
-						pass
-		else:
-			try:	
+		
+		
+		try:
+			async with message.channel.typing():
+				await asyncio.sleep(random.random())
 				await message.channel.send(m)
-			except:
-				ignore.append(message.channel)
+		except:
+			ignore.append(message.channel)
 
 	#learning
 	if learnnew and not message.author.bot:
@@ -170,17 +145,6 @@ async def on_message(message):
 				f.write(end + "\n")
 			print(message.content)
 			print(end)
-
-			if random.random() < .25:
-				e = sendReaction(message, 1)
-				for em in e:
-					try:
-						await message.add_reaction(dictionary_inv[em])
-					except:
-						try:
-							await message.add_reaction(em)
-						except:
-							pass
 
 
 
