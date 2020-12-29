@@ -1,5 +1,6 @@
 import msgpack
 import random
+import emoji
 
 dictionary = {}
 
@@ -7,6 +8,7 @@ with open("dictionary.msgpack", "rb") as f:
 	byte_data = f.read()
 
 dictionary = msgpack.unpackb(byte_data)
+print(dictionary)
 
 dictionary_inv = {v: k for k, v in dictionary.items()}
 
@@ -46,6 +48,17 @@ def createMessage():
 		messages = f.readlines()
 
 	messages = list(set(messages))
+	m = []
+
+	for message in messages:
+		right = True
+		for char in message:
+			if char not in dictionary_inv and char not in emoji.UNICODE_EMOJI and char != "n" and char != "\n" and char != ":" and char != ",":
+				right = False
+		if right:
+			m.append(message)
+
+	m = messages
 
 	with open("messages.txt", "w", encoding="utf-8") as f:
 		for line in messages:
@@ -113,3 +126,5 @@ def decode(s):
 				out += char
 
 	return out
+
+createMessage()

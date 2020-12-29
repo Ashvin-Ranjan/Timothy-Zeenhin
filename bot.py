@@ -7,6 +7,10 @@ import brain
 import random
 import asyncio
 
+key = ""
+
+with open("key.txt", "r") as f:
+	key = f.read().strip()
 
 ignore = []
 
@@ -16,7 +20,7 @@ specialcases = ["🦭", "🫁"]
 
 client = discord.Client()
 
-registered = []
+registered = False
 
 serveremotes = []
 
@@ -69,12 +73,22 @@ async def on_ready():
 async def on_message(message):
 	global registered
 	#register all server emotes
-	if not message.guild.id in registered:
-		registered.append(message.guild.id)
-		for i in message.guild.emojis:
-			if not i.animated:
+	if not registered:
+		for guild in client.guilds:
+			for i in guild.emojis:
 				serveremotes.append('<:%s:%s>' % (i.name, i.id))
-		registered.append(message.guild.id)
+		remove = []
+		for key in dictionary.keys():
+			if key not in serveremotes:
+				remove.append(key)
+
+		for rem in remove:
+			try:
+				del dictionary[key]
+			except:
+				print(rem)
+
+		registered = True
 
 	#send message if @ ed
 	if f'<@!{client.user.id}>' in message.content or f'<@{client.user.id}>' in message.content:
@@ -93,7 +107,7 @@ async def on_message(message):
 	prob = random.random()
 	
 	#send message or reaction
-	if (message.channel.id == 711793617529995297 and prob < .125) or prob <= 0.0035 or message.author.id == 723063395280224257:
+	if (message.channel.id == 711793617529995297 and (prob < .125 or message.author.id == 723063395280224257)) or prob <= 0.01:
 		m = brain.createMessage()
 		p = m
 		for i in serveremotes:
@@ -141,7 +155,7 @@ async def on_message(message):
 		end = end.replace("\n", "n")
 		if end.replace('n', "") != "" and str(message.author) != "MysticalApple#0085":
 			end = ':%s,' % (end.strip("n"))
-			with open('messages.txt', 'a') as f:
+			with open('messages.txt', 'a', encoding="utf-8") as f:
 				f.write(end + "\n")
 			print(message.content)
 			print(end)
@@ -153,4 +167,4 @@ async def on_message(message):
 
 
 
-client.run("")
+client.run(key)
