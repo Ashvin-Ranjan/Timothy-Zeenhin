@@ -143,7 +143,12 @@ async def on_message(message):
 			except:
 				print("adding " + i)
 				#if something is not in the dictionary add it
-				dictionary[i] = chr(len(dictionary.keys()) + 200)
+				indexkey = 200
+				newkey = chr(indexkey)
+				while newkey in dictionary:
+					indexkey += 1
+					newkey = chr(indexkey)
+				dictionary[i] = newkey
 				processed = processed.replace(i, dictionary[i])
 				# Write msgpack file
 				with open("dictionary.msgpack", "wb") as f:
