@@ -12,7 +12,7 @@ print(dictionary)
 
 dictionary_inv = {v: k for k, v in dictionary.items()}
 
-context = 3
+context = 5
 
 def generateChainDict(l):
 	out = {}
@@ -50,6 +50,7 @@ def createMessage():
 	messages = list(set(messages))
 	m = []
 
+
 	for message in messages:
 		right = True
 		for char in message:
@@ -58,7 +59,7 @@ def createMessage():
 		if right:
 			m.append(message)
 
-	m = messages
+	messages = m
 
 	with open("messages.txt", "w", encoding="utf-8") as f:
 		for line in messages:

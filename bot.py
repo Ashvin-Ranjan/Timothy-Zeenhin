@@ -71,7 +71,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	global registered
+	global registered, dictionary_inv
 	#register all server emotes
 	if not registered:
 		for guild in client.guilds:
@@ -83,11 +83,14 @@ async def on_message(message):
 				remove.append(key)
 
 		for rem in remove:
-			try:
-				del dictionary[key]
-			except:
-				print(rem)
+			print(dictionary[rem])
+			dictionary.pop(rem)
 
+		dictionary_inv = {v: k for k, v in dictionary.items()}
+
+		with open("dictionary.msgpack", "wb") as f:
+			packed = msgpack.packb(dictionary)
+			f.write(packed)
 		registered = True
 
 	#send message if @ ed
