@@ -12,7 +12,7 @@ key = ""
 with open("key.txt", "r") as f:
 	key = f.read().strip()
 
-ignore = []
+ignore = [713649228412616714]
 
 learnnew = True
 
@@ -103,8 +103,7 @@ async def on_message(message):
 				await asyncio.sleep(random.random()/4)
 				await message.channel.send(brain.createMessage())
 		except:
-			ignore.append(message.channel)
-		return
+			pass
 
 	if message.author == client.user or message.channel in ignore:
 		return
