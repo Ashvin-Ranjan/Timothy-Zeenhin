@@ -59,6 +59,12 @@ dictionary = msgpack.unpackb(byte_data)
 
 dictionary_inv = {v: k for k, v in dictionary.items()}
 
+dictionary = {v: k for k, v in dictionary_inv.items()}
+
+with open("dictionary.msgpack", "wb") as f:
+	packed = msgpack.packb(dictionary)
+	f.write(packed)
+
 print(dictionary)
 
 @client.event
@@ -71,7 +77,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	global registered, dictionary_inv
+	global registered, dictionary_inv, dictionary
 	#register all server emotes
 	if not registered:
 		for guild in client.guilds:
@@ -83,7 +89,7 @@ async def on_message(message):
 				remove.append(key)
 
 		for rem in remove:
-			print(dictionary[rem])
+			print("removing", rem)
 			dictionary.pop(rem)
 
 		dictionary_inv = {v: k for k, v in dictionary.items()}
@@ -131,7 +137,7 @@ async def on_message(message):
 			ignore.append(message.channel)
 
 	#learning
-	if learnnew and not message.author.bot:
+	if learnnew:
 		processed = message.content
 
 		for i in dictionary_inv.keys():
@@ -141,15 +147,16 @@ async def on_message(message):
 			try:
 				processed = processed.replace(i, dictionary[i])
 			except:
-				print("adding " + i)
 				#if something is not in the dictionary add it
 				indexkey = 200
 				newkey = chr(indexkey)
-				while newkey in dictionary:
+				while newkey in dictionary_inv:
 					indexkey += 1
 					newkey = chr(indexkey)
 				dictionary[i] = newkey
+				dictionary_inv = {v: k for k, v in dictionary.items()}
 				processed = processed.replace(i, dictionary[i])
+				print("adding " + i + " as " + newkey)
 				# Write msgpack file
 				with open("dictionary.msgpack", "wb") as f:
 					packed = msgpack.packb(dictionary)
@@ -161,7 +168,7 @@ async def on_message(message):
 
 		#learning and writing, and maybe reacting
 		end = end.replace("\n", "n")
-		if end.replace('n', "") != "" and str(message.author) != "MysticalApple#0085":
+		if end.replace('n', "") != "" and str(message.author) != "MysticalApple#0085" and (not message.author.bot or random.random() < .5):
 			end = ':%s,' % (end.strip("n"))
 			with open('messages.txt', 'a', encoding="utf-8") as f:
 				f.write(end + "\n")
