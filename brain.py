@@ -108,7 +108,8 @@ def createMessage():
 						cont = False
 					break
 
-
+	if (len(out) - len(out.replace("n", ""))) >= 3:
+		out += chr(8205)
 
 	return decode(out)
 
