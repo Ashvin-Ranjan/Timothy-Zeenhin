@@ -22,34 +22,9 @@ client = discord.Client()
 
 registered = False
 
-serveremotes = []
-
+bots_allowed = [723063395280224257, 766064505079726140]
 
 dictionary = {}
-
-def sendReaction(message, l):
-	m = brain.createMessage()
-	p = m
-	for i in serveremotes:
-		p = p.replace(i, dictionary[i])
-
-	e = ""
-	for char in p:
-		if(char in emoji.UNICODE_EMOJI or char in dictionary.keys() or char == "\n" or char in specialcases ):
-			e += char
-
-	e.replace("\n", "n")
-	prob = random.random()
-	if len(e) <= l and len(set(e)) == len(e) and not "\n" in m:
-		return e
-	else:
-		e = e.replace("n", "")
-		e = e.replace("\n", "")
-		e = "".join(set(e))
-		if len(e) <= l:
-			return e
-		else:
-			return e[0:l]
 
 # Read msgpack file
 with open("dictionary.msgpack", "rb") as f:
@@ -65,39 +40,61 @@ with open("dictionary.msgpack", "wb") as f:
 	packed = msgpack.packb(dictionary)
 	f.write(packed)
 
-print(dictionary)
+#print(dictionary)
+
+def update_emotes():
+	global dictionary_inv, dictionary
+	serveremotes = []
+	for guild in client.guilds:
+		for i in guild.emojis:
+			serveremotes.append('<:%s:%s>' % (i.name, i.id))
+
+	for emote in serveremotes:
+		if emote not in dictionary:
+			#if something is not in the dictionary add it
+			indexkey = 200
+			newkey = chr(indexkey)
+			while newkey in dictionary_inv:
+				indexkey += 1
+				newkey = chr(indexkey)
+			dictionary[emote] = newkey
+			dictionary_inv = {v: k for k, v in dictionary.items()}
+			print("adding " + emote + " as " + newkey)
+			# Write msgpack file
+			with open("dictionary.msgpack", "wb") as f:
+				packed = msgpack.packb(dictionary)
+				f.write(packed)
+
+	remove = []
+	for key in dictionary.keys():
+		if key not in serveremotes:
+			remove.append(key)
+
+	for rem in remove:
+		print("removing", rem)
+		dictionary.pop(rem)
+
+	dictionary_inv = {v: k for k, v in dictionary.items()}
+
+	with open("dictionary.msgpack", "wb") as f:
+		packed = msgpack.packb(dictionary)
+		f.write(packed)
 
 @client.event
 async def on_ready():
 	customActivity = discord.Game("😳")
 	await client.change_presence(status=discord.Status.online, activity=customActivity)
+	
+	update_emotes()
 
 	print("The bot is ready")
 	
 
 @client.event
 async def on_message(message):
-	global registered, dictionary_inv, dictionary
+	global dictionary_inv, dictionary
 	#register all server emotes
-	if not registered:
-		for guild in client.guilds:
-			for i in guild.emojis:
-				serveremotes.append('<:%s:%s>' % (i.name, i.id))
-		remove = []
-		for key in dictionary.keys():
-			if key not in serveremotes:
-				remove.append(key)
-
-		for rem in remove:
-			print("removing", rem)
-			dictionary.pop(rem)
-
-		dictionary_inv = {v: k for k, v in dictionary.items()}
-
-		with open("dictionary.msgpack", "wb") as f:
-			packed = msgpack.packb(dictionary)
-			f.write(packed)
-		registered = True
+	update_emotes()
 
 	#send message if @ ed
 	if f'<@!{client.user.id}>' in message.content or f'<@{client.user.id}>' in message.content:
@@ -116,10 +113,10 @@ async def on_message(message):
 	prob = random.random()
 	
 	#send message or reaction
-	if (message.channel.id == 711793617529995297 and (prob < .125 or message.author.id == 723063395280224257)) or prob <= 0.01:
+	if (message.channel.id == 711793617529995297 and (prob < .1 or message.author.id == 723063395280224257)) or prob <= 0.01:
 		m = brain.createMessage()
 		p = m
-		for i in serveremotes:
+		for i in dictionary.keys():
 			p = p.replace(i, dictionary[i])
 
 		e = ""
@@ -143,24 +140,9 @@ async def on_message(message):
 		for i in dictionary_inv.keys():
 			processed = processed.replace(i, "")
 
-		for i in serveremotes:
-			try:
-				processed = processed.replace(i, dictionary[i])
-			except:
-				#if something is not in the dictionary add it
-				indexkey = 200
-				newkey = chr(indexkey)
-				while newkey in dictionary_inv:
-					indexkey += 1
-					newkey = chr(indexkey)
-				dictionary[i] = newkey
-				dictionary_inv = {v: k for k, v in dictionary.items()}
-				processed = processed.replace(i, dictionary[i])
-				print("adding " + i + " as " + newkey)
-				# Write msgpack file
-				with open("dictionary.msgpack", "wb") as f:
-					packed = msgpack.packb(dictionary)
-					f.write(packed)
+		for i in dictionary.keys():
+			processed = processed.replace(i, dictionary[i])
+			
 		end = ""
 		for char in processed:
 			if(char in emoji.UNICODE_EMOJI or char in dictionary_inv.keys() or char == "\n" or char in specialcases):
@@ -168,7 +150,7 @@ async def on_message(message):
 
 		#learning and writing, and maybe reacting
 		end = end.replace("\n", "n")
-		if end.replace('n', "") != "" and str(message.author) != "MysticalApple#0085" and (not message.author.bot or random.random() < .5):
+		if end.replace('n', "") != "" and (not message.author.bot or message.author.id in bots_allowed):
 			end = ':%s,' % (end.strip("n"))
 			with open('messages.txt', 'a', encoding="utf-8") as f:
 				f.write(end + "\n")
