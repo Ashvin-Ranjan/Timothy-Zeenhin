@@ -110,7 +110,7 @@ def createMessage():
 
 
 	decoded = decode(out)
-	if (len(decoded) - len(out.replace("\n", ""))) >= 3:
+	if (len(decoded) - len(decoded.replace("\n", ""))) >= 3:
 		decoded += u'\u200c'
 		
 	return decoded
