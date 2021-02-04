@@ -108,10 +108,12 @@ def createMessage():
 						cont = False
 					break
 
-	if (len(out) - len(out.replace("n", ""))) >= 3:
-		out += chr(8205)
 
-	return decode(out)
+	decoded = decode(out)
+	if (len(decoded) - len(out.replace("\n", ""))) >= 3:
+		decoded += u'\u200c'
+		
+	return decoded
 
 
 
