@@ -40,6 +40,22 @@ with open("dictionary.msgpack", "wb") as f:
 	packed = msgpack.packb(dictionary)
 	f.write(packed)
 
+rates = {}
+
+# Read msgpack file
+with open("rates.msgpack", "rb") as f:
+	byte_data = f.read()
+
+rates = msgpack.unpackb(byte_data)
+
+validated = {}
+
+# Read msgpack file
+with open("validated.msgpack", "rb") as f:
+	byte_data = f.read()
+
+validated = msgpack.unpackb(byte_data)
+
 #print(dictionary)
 
 def update_emotes():
@@ -92,7 +108,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	global dictionary_inv, dictionary
+	global dictionary_inv, dictionary, rates, validated
 	#register all server emotes
 	update_emotes()
 
@@ -110,9 +126,55 @@ async def on_message(message):
 
 
 	prob = random.random()
-	
+
+	if message.content.split(" ")[0].strip().startswith("~set") and len(message.content.split(" ")) == 3:
+		try:
+			if(validated[str(message.author.id)]):
+				rates[str(int(message.content.split(" ")[1].strip()))] = float(message.content.split(" ")[2].strip())
+				with open("rates.msgpack", "wb") as f:
+					packed = msgpack.packb(rates)
+					f.write(packed)
+				await message.add_reaction("✅")
+			else:
+				await message.add_reaction("❌")
+		except:
+			await message.add_reaction("❌")
+
+		return
+
+	if message.content.split(" ")[0].strip().startswith("~validate") and len(message.content.split(" ")) == 2 and message.author.id == 384499090865782785:
+		try:
+			validated[str(int(message.content.split(" ")[1].strip()))] = True
+			with open("validated.msgpack", "wb") as f:
+				packed = msgpack.packb(validated)
+				f.write(packed)
+			await message.add_reaction("✅")
+		except Exception as e:
+			print(e)
+			await message.add_reaction("❌")
+
+		return
+
+	if message.content.split(" ")[0].strip().startswith("~devalidate") and len(message.content.split(" ")) == 2 and message.author.id == 384499090865782785:
+		try:
+			validated[str(int(message.content.split(" ")[1].strip()))] = False
+			with open("validated.msgpack", "wb") as f:
+				packed = msgpack.packb(validated)
+				f.write(packed)
+			await message.add_reaction("✅")
+		except Exception as e:
+			print(e)
+			await message.add_reaction("❌")
+
+		return
+
 	#send message or reaction
-	if (message.channel.id == 711793617529995297 and (prob < .1 or message.author.id == 723063395280224257)) or prob <= 0.01:
+	rate = 0.01
+	try:
+		rate = rates[str(message.channel.id)]
+	except:
+		pass
+	if prob <= rate:
 		m = brain.createMessage()
 		p = m
 		for i in dictionary.keys():
