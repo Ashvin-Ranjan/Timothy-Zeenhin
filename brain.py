@@ -109,7 +109,19 @@ def createMessage():
 					break
 
 
+	try:
+		out = out[0:50]
+	except:
+		pass
+
 	decoded = decode(out)
+
+	try:
+		decoded = "\n".join(decoded.split("\n")[0:5])
+	except:
+		pass
+
+
 	if (len(decoded) - len(decoded.replace("\n", ""))) >= 3:
 		decoded += u'\u200c'
 		
