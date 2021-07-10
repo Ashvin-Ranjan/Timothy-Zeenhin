@@ -63,7 +63,10 @@ def update_emotes():
 	serveremotes = []
 	for guild in client.guilds:
 		for i in guild.emojis:
-			serveremotes.append('<:%s:%s>' % (i.name, i.id))
+			if i.animated:
+				serveremotes.append('<a:%s:%s>' % (i.name, i.id))
+			else:
+				serveremotes.append('<:%s:%s>' % (i.name, i.id))
 
 	for emote in serveremotes:
 		if emote not in dictionary:
